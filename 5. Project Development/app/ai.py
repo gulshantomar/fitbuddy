@@ -6,12 +6,57 @@ import bleach
 from google import genai
 from markdown import markdown
 
+DEFAULT_MODEL_CANDIDATES = [
+    "gemini-2.5-flash",
+    "gemini-3-flash-preview",
+    "gemini-flash-latest",
+    "gemini-2.0-flash",
+]
+DEFAULT_TIMEOUT_MS = 30_000
+
 
 def _model_candidates() -> list[str]:
     """Read model names from env and return a safe default when missing."""
-    raw = os.getenv("GEMINI_MODEL_CANDIDATES", "gemini-3-flash-preview")
+    raw = os.getenv("GEMINI_MODEL_CANDIDATES", "")
     parsed = [item.strip() for item in raw.split(",") if item.strip()]
-    return parsed or ["gemini-3-flash-preview"]
+    return parsed or DEFAULT_MODEL_CANDIDATES
+
+
+def _request_timeout_ms() -> int:
+    """Read timeout from env and keep a sane lower bound."""
+    raw = os.getenv("GEMINI_TIMEOUT_MS", str(DEFAULT_TIMEOUT_MS)).strip()
+    try:
+        timeout_ms = int(raw)
+    except ValueError:
+        return DEFAULT_TIMEOUT_MS
+    return timeout_ms if timeout_ms >= 1000 else DEFAULT_TIMEOUT_MS
+
+
+def _should_try_next_model(error_text: str) -> bool:
+    """Continue on model-specific or transient failures and try fallback candidates."""
+    retryable_markers = (
+        "not found",
+        "404",
+        "resource_exhausted",
+        "429",
+        "quota",
+        "deadline",
+        "timed out",
+        "timeout",
+        "unavailable",
+        "503",
+    )
+    return any(marker in error_text for marker in retryable_markers)
+
+
+def _friendly_runtime_error(exc: Exception) -> RuntimeError:
+    """Map common provider errors to clear user-facing messages."""
+    message = str(exc).lower()
+    if "api key" in message or "permission" in message or "unauthorized" in message:
+        return RuntimeError("Gemini API key is invalid or missing required permissions.")
+    if "quota" in message or "resource_exhausted" in message or "429" in message:
+        return RuntimeError("Gemini quota is exhausted. Please check billing or try again later.")
+    return RuntimeError("AI generation failed. Please try again.")
 
 
 def _get_client() -> genai.Client:
@@ -19,7 +64,7 @@ def _get_client() -> genai.Client:
     api_key = os.getenv("GOOGLE_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("GOOGLE_API_KEY is missing. Add it to your .env file.")
-    return genai.Client(api_key=api_key)
+    return genai.Client(api_key=api_key, http_options={"timeout": _request_timeout_ms()})
 
 
 def _generate_text(prompt: str) -> str:
@@ -37,10 +82,12 @@ def _generate_text(prompt: str) -> str:
         except Exception as exc:  # pragma: no cover
             last_error = exc
             message = str(exc).lower()
-            if "not found" in message or "404" in message:
+            if _should_try_next_model(message):
                 continue
-            raise RuntimeError("AI generation failed. Please try again.") from exc
+            raise _friendly_runtime_error(exc) from exc
 
+    if last_error is None:
+        raise RuntimeError("No Gemini model candidates are configured.")
     raise RuntimeError(f"No working Gemini model was found. Last error: {last_error}")
 
 

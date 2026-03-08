@@ -1,6 +1,7 @@
 """Beginner-friendly FastAPI app with form routes."""
 
 from datetime import datetime
+import logging
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
@@ -19,6 +20,7 @@ app = FastAPI(title="FitBuddy")
 templates = Jinja2Templates(directory="templates")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+logger = logging.getLogger(__name__)
 
 ALLOWED_GOALS = {"Muscle Gain", "Weight Loss", "General Fitness"}
 ALLOWED_INTENSITY = {"Low", "Medium", "High"}
@@ -67,6 +69,7 @@ def generate(
     try:
         plan = generate_workout_plan(name, goal, intensity)
     except RuntimeError as exc:
+        logger.warning("Workout generation failed: %s", exc)
         return templates.TemplateResponse(
             request,
             "result.html",
@@ -134,6 +137,7 @@ def submit_feedback(
     try:
         updated_plan = update_workout_plan(user.original_plan, feedback)
     except RuntimeError as exc:
+        logger.warning("Workout feedback update failed for user_id=%s: %s", user_id, exc)
         return templates.TemplateResponse(
             request,
             "result.html",

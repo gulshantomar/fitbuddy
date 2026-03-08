@@ -97,7 +97,8 @@ Create a `.env` file in the project root:
 ```env
 GOOGLE_API_KEY=your_actual_gemini_api_key_here
 DATABASE_URL=sqlite:///./fitbuddy.db
-GEMINI_MODEL_CANDIDATES=gemini-3-flash-preview
+GEMINI_MODEL_CANDIDATES=gemini-2.5-flash,gemini-3-flash-preview,gemini-flash-latest,gemini-2.0-flash
+GEMINI_TIMEOUT_MS=30000
 ```
 
 ### 6. Run the App
@@ -201,6 +202,7 @@ result.html --POST /submit-feedback--> app/main.py
 | `GOOGLE_API_KEY` | Yes | Gemini API key |
 | `DATABASE_URL` | No | SQLAlchemy DB URL (default: local SQLite) |
 | `GEMINI_MODEL_CANDIDATES` | No | Comma-separated model fallback list |
+| `GEMINI_TIMEOUT_MS` | No | Gemini request timeout in milliseconds (default: `30000`) |
 
 ---
 
