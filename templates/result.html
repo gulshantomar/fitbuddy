@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}FitBuddy | Your Plan{% endblock %}
+
+{% block content %}
+<section class="card card-wide">
+    <h2>Workout Plan for {{ name }}</h2>
+    <p class="muted">Generated at: {{ generated_at }}</p>
+
+    {% if error_message %}
+    <div class="alert warning">
+        <strong>Temporary AI limit reached:</strong> {{ error_message }}
+    </div>
+    {% endif %}
+
+    <div class="plan-box">
+        <h3>7-Day Routine</h3>
+        {% if plan_html %}
+        <div class="plan-content markdown-body">{{ plan_html | safe }}</div>
+        {% else %}
+        <div class="plan-content">{{ plan }}</div>
+        {% endif %}
+    </div>
+
+    <div class="tip-box">
+        <h3>Nutrition Tip</h3>
+        <p>{{ tip }}</p>
+    </div>
+
+    <div class="feedback-section">
+        {% if user_id %}
+        <h3>Need changes?</h3>
+        <form action="/submit-feedback" method="post" class="form-grid" data-loading="true">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <div class="full-width">
+                <label for="feedback">Feedback</label>
+                <input id="feedback" type="text" name="feedback" minlength="5" maxlength="500" placeholder="Example: Add more cardio and reduce lower-body volume" required>
+            </div>
+            <div class="full-width">
+                <button type="submit">Update My Plan</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="muted">Feedback will be available once a plan is saved.</p>
+        {% endif %}
+    </div>
+
+    <a href="/" class="back-link">Generate New Plan</a>
+</section>
+{% endblock %}

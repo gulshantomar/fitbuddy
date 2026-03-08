@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}FitBuddy | Admin{% endblock %}
+
+{% block content %}
+<section class="card card-wide">
+    <h2>User Records Dashboard</h2>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Goal</th>
+                    <th>Intensity</th>
+                    <th>Generated</th>
+                    <th>Plan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.goal }}</td>
+                    <td>{{ user.intensity }}</td>
+                    <td>{{ user.generated_at }}</td>
+                    <td><details><summary>View</summary><pre>{{ user.updated_plan or user.original_plan }}</pre></details></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="/" class="back-link">Back to Home</a>
+</section>
+{% endblock %}
