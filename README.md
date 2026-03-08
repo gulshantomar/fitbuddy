@@ -1,7 +1,24 @@
-# 💪 FitBuddy - AI Workout Planner
+# 💪 FitBuddy — AI-Powered Personalized Workout Planner
+
+Generate personalized 7-day workout plans using Google Gemini AI.
 
 FitBuddy is a full-stack web app that generates personalized 7-day workout plans using Google Gemini.
 Users can submit their fitness profile, view a clean formatted plan, refine it with natural-language feedback, and get practical nutrition/recovery tips.
+
+---
+
+## 🎥 Demo
+
+Watch the project demo:
+
+https://drive.google.com/drive/folders/1I1uUMuv-s2ah17im-AKbEWtrQkrpFgu5
+
+This video demonstrates:
+
+- Entering user fitness profile
+- AI workout plan generation
+- Feedback-based plan updates
+- Admin dashboard
 
 ---
 
@@ -12,6 +29,22 @@ Users can submit their fitness profile, view a clean formatted plan, refine it w
 - **Nutrition / Recovery Tip** - Quick goal-specific tip is shown with every plan.
 - **Persistent Storage** - Plans are saved in local SQLite using SQLAlchemy.
 - **Simple Beginner Architecture** - Flat Python structure with only 3 backend files.
+
+---
+
+## 📸 Screenshots
+
+### Home Page
+
+![Home Page](docs/screenshots/home.png)
+
+### Generated Workout Plan
+
+![Workout Plan](docs/screenshots/result.png)
+
+### Admin Dashboard
+
+![Admin Dashboard](docs/screenshots/admin.png)
 
 ---
 
@@ -27,6 +60,24 @@ Users can submit their fitness profile, view a clean formatted plan, refine it w
 
 ---
 
+## 🏗 System Architecture
+
+The application follows a layered architecture:
+
+```text
+User Browser
+   ↓
+Frontend (HTML + Jinja2)
+   ↓
+FastAPI Backend
+   ↓
+AI Service (Google Gemini)
+   ↓
+SQLite Database
+```
+
+---
+
 ## Project Structure
 
 ```text
@@ -36,6 +87,13 @@ fitbuddy/
 |-- .gitignore
 |-- .env                      # local only, not committed
 |-- fitbuddy.db               # auto-created SQLite DB
+|-- docs/
+|   |-- architecture.png      # add exported architecture diagram
+|   |-- screenshots/
+|       |-- .gitkeep
+|       |-- home.png          # add screenshot
+|       |-- result.png        # add screenshot
+|       |-- admin.png         # add screenshot
 |
 |-- app/
 |   |-- __init__.py
@@ -96,9 +154,6 @@ Create a `.env` file in the project root:
 
 ```env
 GOOGLE_API_KEY=your_actual_gemini_api_key_here
-DATABASE_URL=sqlite:///./fitbuddy.db
-GEMINI_MODEL_CANDIDATES=gemini-2.5-flash,gemini-3-flash-preview,gemini-flash-latest,gemini-2.0-flash
-GEMINI_TIMEOUT_MS=30000
 ```
 
 ### 6. Run the App
@@ -113,7 +168,7 @@ Go to: `http://127.0.0.1:8000`
 
 ---
 
-## Endpoints
+## API Endpoints
 
 ### `GET /`
 Shows the input form (`index.html`).
@@ -141,6 +196,24 @@ Shows all saved users and plans (`all_users.html`).
 
 ### `GET /health`
 Simple health check response.
+
+---
+
+## Example API Request
+
+Generate a workout plan:
+
+`POST /generate`
+
+Example form body:
+
+```text
+name=Alex
+age=23
+weight=68
+goal=Weight Loss
+intensity=Medium
+```
 
 ---
 
@@ -200,14 +273,20 @@ result.html --POST /submit-feedback--> app/main.py
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GOOGLE_API_KEY` | Yes | Gemini API key |
-| `DATABASE_URL` | No | SQLAlchemy DB URL (default: local SQLite) |
-| `GEMINI_MODEL_CANDIDATES` | No | Comma-separated model fallback list |
-| `GEMINI_TIMEOUT_MS` | No | Gemini request timeout in milliseconds (default: `30000`) |
 
 ---
 
-## Notes
+## Limitations
 
-- This repo is intentionally simplified for college/project learning.
-- Alembic migrations and test suite were removed to keep setup lightweight.
-- If you changed model structure and run into DB issues, delete `fitbuddy.db` and restart.
+- Depends on external Gemini API availability
+- No user authentication system yet
+- Workout plans are text-based only
+- No long-term progress tracking
+
+---
+
+## License
+
+This project is created for academic and educational purposes.
+
+---
