@@ -1,0 +1,9 @@
+fastapi==0.134.0
+uvicorn==0.41.0
+jinja2==3.1.6
+sqlalchemy==2.0.47
+python-multipart==0.0.22
+google-genai==1.65.0
+python-dotenv==1.2.1
+Markdown==3.8.2
+bleach==6.2.0
